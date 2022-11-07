@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC “-//W3C//DTD HTML 4.0 Transitional//EN”>
  <HTML>
   <HEAD>
-   <TITLE> New Document </TITLE>
+   <TITLE> for your page z </TITLE>
    <META NAME=”Generator” CONTENT=”EditPlus”>
    <META NAME=”Author” CONTENT=””>
    <META NAME=”Keywords” CONTENT=””>
@@ -44,7 +44,7 @@
 /*
   * RequestAnimationFrame polyfill by Erik Möller
   */
- (function(){var b=0;var c=[“ms”,”moz”,”webkit”,”o”];for(var a=0;a<c.length&&!window.requestAnimationFrame;++a){window.requestAnimationFrame=window[c[a]+”RequestAnimationFrame”];window.cancelAnimationFrame=window[c[a]+”CancelAnimationFrame”]||window[c[a]+”CancelRequestAnimationFrame”]}if(!window.requestAnimationFrame){window.requestAnimationFrame=function(h,e){var d=new Date().getTime();var f=Math.max(0,16-(d-b));var g=window.setTimeout(function(){h(d+f)},f);b=d+f;return g}}if(!window.cancelAnimationFrame){window.cancelAnimationFrame=function(d){clearTimeout(d)}}}());
+ (function(){var b=0;var c=["ms","moz","webkit","o"];for(var a=0;a<c.length&&!window.requestAnimationFrame;++a){window.requestAnimationFrame=window[c[a]+"RequestAnimationFrame"];window.cancelAnimationFrame=window[c[a]+"CancelAnimationFrame"]||window[c[a]+"CancelRequestAnimationFrame"]}if(!window.requestAnimationFrame){window.requestAnimationFrame=function(h,e){var d=new Date().getTime();var f=Math.max(0,16-(d-b));var g=window.setTimeout(function(){h(d+f)},f);b=d+f;return g}}if(!window.cancelAnimationFrame){window.cancelAnimationFrame=function(d){clearTimeout(d)}}}());
 
 /*
   * Point class
@@ -53,8 +53,8 @@
  
    function Point(x, y) {
  
-     this.x = (typeof x !== ‘undefined’) ? x : 0;
-     this.y = (typeof y !== ‘undefined’) ? y : 0;
+     this.x = (typeof x !== 'undefined') ? x : 0;
+     this.y = (typeof y !== 'undefined') ? y : 0;
    }
    Point.prototype.clone = function() {
  
@@ -62,7 +62,7 @@
    };
    Point.prototype.length = function(length) {
  
-     if (typeof length == ‘undefined’)
+     if (typeof length == 'undefined')
        return Math.sqrt(this.x * this.x + this.y * this.y);
      this.normalize();
      this.x *= length;
@@ -108,16 +108,16 @@
      this.velocity.x += this.acceleration.x * deltaTime;
      this.velocity.y += this.acceleration.y * deltaTime;
      this.age += deltaTime;
-   };
+   };   
    Particle.prototype.draw = function(context, image) {
  
      function ease(t) {
  
-       return (–t) * t * t + 1;
+       return (-t) * t * t + 1;
      }
      var size = image.width * ease(this.age / settings.particles.duration);
-     context.globalAlpha = 1 – this.age / settings.particles.duration;
-     context.drawImage(image, this.position.x – size / 2, this.position.y – size / 2, size, size);
+     context.globalAlpha = 1 - this.age / settings.particles.duration;
+     context.drawImage(image, this.position.x - size / 2, this.position.y - size / 2, size, size);
    };
    return Particle;
  })();
@@ -200,7 +200,7 @@
   */
  (function(canvas) {
  
-   var context = canvas.getContext(‘2d’),
+   var context = canvas.getContext('2d'),
        particles = new ParticlePool(settings.particles.length),
        particleRate = settings.particles.length / settings.particles.duration, // particles/sec
        time;
@@ -210,15 +210,15 @@
  
      return new Point(
        160 * Math.pow(Math.sin(t), 3),
-       130 * Math.cos(t) – 50 * Math.cos(2 * t) – 20 * Math.cos(3 * t) – 10 * Math.cos(4 * t) + 25
+       130 * Math.cos(t) - 50 * Math.cos(2 * t) - 20 * Math.cos(3 * t) - 10 * Math.cos(4 * t) + 25
      );
    }
    
    // creating the particle image using a dummy canvas
    var image = (function() {
  
-     var canvas  = document.createElement(‘canvas’),
-         context = canvas.getContext(‘2d’);
+     var canvas  = document.createElement('canva'),
+         context = canvas.getContext('2d');
      canvas.width  = settings.particles.size;
      canvas.height = settings.particles.size;
      // helper function to create the path
@@ -226,7 +226,7 @@
  
        var point = pointOnHeart(t);
        point.x = settings.particles.size / 2 + point.x * settings.particles.size / 350;
-       point.y = settings.particles.size / 2 – point.y * settings.particles.size / 350;
+       point.y = settings.particles.size / 2 - point.y * settings.particles.size / 350;
        return point;
      }
      // create the path
@@ -242,7 +242,7 @@
      }
      context.closePath();
      // create the fill
-     context.fillStyle = ‘#ea80b0’;
+     context.fillStyle = '#ea80b0';
      context.fill();
      // create the image
      var image = new Image();
@@ -258,7 +258,7 @@
      
      // update time
      var newTime   = new Date().getTime() / 1000,
-         deltaTime = newTime – (time || newTime);
+         deltaTime = newTime - (time || newTime);
      time = newTime;
      
      // clear canvas
@@ -268,9 +268,9 @@
      var amount = particleRate * deltaTime;
      for (var i = 0; i < amount; i++) {
  
-       var pos = pointOnHeart(Math.PI – 2 * Math.PI * Math.random());
+       var pos = pointOnHeart(Math.PI - 2 * Math.PI * Math.random());
        var dir = pos.clone().length(settings.particles.velocity);
-       particles.add(canvas.width / 2 + pos.x, canvas.height / 2 – pos.y, dir.x, -dir.y);
+       particles.add(canvas.width / 2 + pos.x, canvas.height / 2 - pos.y, dir.x, -dir.y);
      }
      
      // update and draw particles
@@ -292,7 +292,7 @@
      onResize();
      render();
    }, 10);
- })(document.getElementById(‘pinkboard’));
+ })(document.getElementById('pinkboard'));
    </script>
   </BODY>
  </HTML>
