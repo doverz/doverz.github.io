@@ -28,7 +28,7 @@ canvas {
 </style>
 <body>
     <canvas id="pinkboard"></canvas>
- 
+    <script type="text/javascript" src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-2.0.0.min.js"></script>
     <script>
        
 /*
@@ -36,11 +36,11 @@ canvas {
  */
 var settings = {
   particles: {
-    length:   500, // maximum amount of particles
-    duration:   2, // particle duration in sec
-    velocity: 100, // particle velocity in pixels/sec
-    effect: -0.75, // play with this for a nice effect
-    size:      30, // particle size in pixels
+    length:   800, // maximum amount of particles
+    duration:   3, // particle duration in sec
+    velocity: 80, // particle velocity in pixels/sec
+    effect: -0.4, // play with this for a nice effect
+    size:     20, // particle size in pixels
   },
 };
  
@@ -242,15 +242,26 @@ var ParticlePool = (function() {
     
     // create new particles
     var amount = particleRate * deltaTime;
+    var alpha = 1;
     for (var i = 0; i < amount; i++) {
       var pos = pointOnHeart(Math.PI - 2 * Math.PI * Math.random());
       var dir = pos.clone().length(settings.particles.velocity);
       particles.add(canvas.width / 2 + pos.x, canvas.height / 2 - pos.y, dir.x, -dir.y);
+      if (i%10==0)
+        alpha -= 0.5/amount;
     }
     
     // update and draw particles
     particles.update(deltaTime);
     particles.draw(context, image);
+    context.font = "bold 32px Microsoft YaHei";
+    context.strokeStyle = "HotPink";
+    context.fillStyle = "#FFDAB9"
+    // context.strokeStyle =
+    context.globalAlpha = alpha;
+    context.textAlign = "center";
+    context.fillText("❤小芮", canvas.width / 2 ,canvas.height / 2-20);
+    context.fillText("Happy Birthday!",canvas.width / 2 ,canvas.height / 2+20);
   }
   
   // handle (re-)sizing of the canvas
@@ -264,9 +275,36 @@ var ParticlePool = (function() {
   setTimeout(function() {
     onResize();
     render();
-  }, 10);
+  }, 100);
 })(document.getElementById('pinkboard'));
- 
+
+var a_idx = 0;
+  $(document).ready(function() {
+        $("body").click(function(e) {
+            var a = new Array("❤乖乖🐱","❤点点🐱");
+            var $i = $("<span></span>").text(a[a_idx]);
+            a_idx = (a_idx + 1) % a.length;
+            var x = e.pageX,
+            y = e.pageY;
+            $i.css({
+                "z-index": 999999999999999999999999999999999999999999999999999999999999999999999,
+                "top": y - 20,
+                "left": x,
+                "position": "absolute",
+                "font-weight": "bold",
+                "color": "rgb("+~~(255*Math.random())+","+~~(255*Math.random())+","+~~(255*Math.random())+")"
+            });
+            $("body").append($i);
+            $i.animate({
+                "top": y - 180,
+                "opacity": 0
+            },
+            1500,
+            function() {
+                $i.remove();
+            });
+        });
+    });
  
  
  
