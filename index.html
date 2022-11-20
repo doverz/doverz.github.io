@@ -280,7 +280,7 @@ var ParticlePool = (function() {
 
 var a_idx = 0;
   $(document).ready(function() {
-        $("body").tap(function(e) {
+        $("body").on("tap",function(e) {
             var a = new Array("❤乖乖🐱","❤点点🐱");
             var $i = $("<span></span>").text(a[a_idx]);
             a_idx = (a_idx + 1) % a.length;
