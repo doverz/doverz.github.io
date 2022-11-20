@@ -28,7 +28,7 @@ canvas {
 </style>
 <body>
     <canvas id="pinkboard"></canvas>
-    <script type="text/javascript" src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-2.0.0.min.js"></script>
+    <script type="text/javascript" src="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
     <script>
        
 /*
@@ -280,7 +280,7 @@ var ParticlePool = (function() {
 
 var a_idx = 0;
   $(document).ready(function() {
-        $("body").click(function(e) {
+        $("body").tap(function(e) {
             var a = new Array("❤乖乖🐱","❤点点🐱");
             var $i = $("<span></span>").text(a[a_idx]);
             a_idx = (a_idx + 1) % a.length;
