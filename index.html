@@ -25,12 +25,341 @@ canvas {
   bottom: 10px;
   color: #ccc
 }
+#canvas1 {
+            position: absolute;
+            left: 0px;
+            top: 0px;
+            /* margin: 20px; */
+            /* background: #ffffff; */
+            /* border: thin solid #aaaaaa; */
+        }
+
+  #canvas2 {
+      position: absolute;
+      left: 0px;
+      top: 0px;
+      /* margin: 20px; */
+      /* border: thin solid #aaaaaa; */
+  }
+  #tree {
+    position: absolute;
+      left: -300px;
+      top: 0px;
+  }
+  #flower{
+    position: absolute;
+    left: -300px;
+      top: 0px;
+  }
 </style>
 <body>
-    <canvas id="pinkboard"></canvas>
-<!--     <link rel="stylesheet" href="https://apps.bdimg.com/libs/jquerymobile/1.4.5/jquery.mobile-1.4.5.min.css"> -->
+    <canvas id="canvas1"></canvas>
+    <canvas id="canvas2"></canvas>
+
+    <!-- <link rel="stylesheet" href="https://apps.bdimg.com/libs/jquerymobile/1.4.5/jquery.mobile-1.4.5.min.css"> -->
     <script src="https://apps.bdimg.com/libs/jquery/1.10.2/jquery.min.js"></script>
     <script src="https://apps.bdimg.com/libs/jquerymobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+
+    <script>
+      var utils = {
+        norm: function(value, min, max) {
+          return (value - min) / (max - min);
+        },
+      
+        lerp: function(norm, min, max) {
+          return (max - min) * norm + min;
+        },
+      
+        map: function(value, sourceMin, sourceMax, destMin, destMax) {
+          return utils.lerp(utils.norm(value, sourceMin, sourceMax), destMin, destMax);
+        },
+      
+        clamp: function(value, min, max) {
+          return Math.min(Math.max(value, Math.min(min, max)), Math.max(min, max));
+        },
+      
+        distance: function(p0, p1) {
+          var dx = p1.x - p0.x,
+            dy = p1.y - p0.y;
+          return Math.sqrt(dx * dx + dy * dy);
+        },
+      
+        distanceXY: function(x0, y0, x1, y1) {
+          var dx = x1 - x0,
+            dy = y1 - y0;
+          return Math.sqrt(dx * dx + dy * dy);
+        },
+      
+        circleCollision: function(c0, c1) {
+          return utils.distance(c0, c1) <= c0.radius + c1.radius;
+        },
+      
+        circlePointCollision: function(x, y, circle) {
+          return utils.distanceXY(x, y, circle.x, circle.y) < circle.radius;
+        },
+      
+        pointInRect: function(x, y, rect) {
+          return utils.inRange(x, rect.x, rect.x + rect.radius) &&
+            utils.inRange(y, rect.y, rect.y + rect.radius);
+        },
+      
+        inRange: function(value, min, max) {
+          return value >= Math.min(min, max) && value <= Math.max(min, max);
+        },
+      
+        rangeIntersect: function(min0, max0, min1, max1) {
+          return Math.max(min0, max0) >= Math.min(min1, max1) &&
+            Math.min(min0, max0) <= Math.max(min1, max1);
+        },
+      
+        rectIntersect: function(r0, r1) {
+          return utils.rangeIntersect(r0.x, r0.x + r0.width, r1.x, r1.x + r1.width) &&
+            utils.rangeIntersect(r0.y, r0.y + r0.height, r1.y, r1.y + r1.height);
+        },
+      
+        degreesToRads: function(degrees) {
+          return degrees / 180 * Math.PI;
+        },
+      
+        radsToDegrees: function(radians) {
+          return radians * 180 / Math.PI;
+        },
+      
+        randomRange: function(min, max) {
+          return min + Math.random() * (max - min);
+        },
+      
+        randomInt: function(min, max) {
+          return min + Math.random() * (max - min + 1);
+        },
+      
+        getmiddle: function(p0, p1) {
+          var x = p0.x,
+            x2 = p1.x;
+          middlex = (x + x2) / 2;
+          var y = p0.y,
+            y2 = p1.y;
+          middley = (y + y2) / 2;
+          pos = [middlex, middley];
+      
+          return pos;
+        },
+      
+        getAngle: function(p0, p1) {
+          var deltaX = p1.x - p0.x;
+          var deltaY = p1.y - p0.y;
+          var rad = Math.atan2(deltaY, deltaX);
+          return rad;
+        },
+        inpercentW: function(size) {
+          return (size * W) / 100;
+        },
+      
+        inpercentH: function(size) {
+          return (size * H) / 100;
+        },
+      
+      }
+      
+      // basic setup  :) 
+      
+      canvas = document.getElementById("canvas2");
+      var ctx = canvas.getContext('2d');
+      W = canvas.width = window.innerWidth;
+      H = canvas.height = window.innerHeight;
+      
+      gridX = 5;
+      gridY = 5;
+      
+      function shape(x, y, texte) {
+        this.x = x;
+        this.y = y;
+        this.size = 72;
+      
+        this.text = texte;
+        this.placement = [];
+        this.vectors = [];
+      
+      }
+      
+      shape.prototype.getValue = function() {
+        console.log("get black pixels position");
+      
+        // Draw the shape :^)
+      
+        ctx.textAlign = "center";
+        ctx.font = "bold " + this.size + "px arial";
+        ctx.fillText(this.text, this.x, this.y);
+      
+      
+        var idata = ctx.getImageData(0, 0, W, H);
+      
+        var buffer32 = new Uint32Array(idata.data.buffer);
+      
+        for (var y = 0; y < H; y += gridY) {
+          for (var x = 0; x < W; x += gridX) {
+      
+            if (buffer32[y * W + x]) {
+              this.placement.push(new particle2(x, y));
+            }
+          }
+        }
+        ctx.clearRect(0, 0, W, H);
+      
+      }
+      colors = [
+        '#f44336', '#e91e63', '#9c27b0', '#673ab7', '#3f51b5',
+        '#2196f3', '#03a9f4', '#00bcd4', '#009688', '#4CAF50',
+        '#8BC34A', '#CDDC39', '#FFEB3B', '#FFC107', '#FF9800',
+        '#FF5722'
+      ];
+      
+      function particle2(x, y, type) {
+        this.radius = 1.1;
+        this.futurRadius = utils.randomInt(radius, radius+3);
+        
+        
+        this.rebond = utils.randomInt(1, 5);
+        this.x = x;
+        this.y = y;
+        
+        this.dying = false;
+        
+        this.base = [x, y]
+      
+        this.vx = 0;
+        this.vy = 0;
+        this.type = type;
+        this.friction = .99;
+        this.gravity = gravity;
+        this.color = colors[Math.floor(Math.random() * colors.length)];
+      
+        this.getSpeed = function() {
+          return Math.sqrt(this.vx * this.vx + this.vy * this.vy);
+        };
+      
+        this.setSpeed = function(speed) {
+          var heading = this.getHeading();
+          this.vx = Math.cos(heading) * speed;
+          this.vy = Math.sin(heading) * speed;
+        };
+      
+        this.getHeading = function() {
+          return Math.atan2(this.vy, this.vx);
+        };
+      
+        this.setHeading = function(heading) {
+          var speed = this.getSpeed();
+          this.vx = Math.cos(heading) * speed;
+          this.vy = Math.sin(heading) * speed;
+        };
+      
+        this.angleTo = function(p2) {
+          return Math.atan2(p2.y - this.y, p2.x - this.x);
+      
+        };
+      
+        this.update = function(heading) {
+          this.x += this.vx;
+          this.y += this.vy;
+          this.vy += gravity;
+      
+          this.vx *= this.friction;
+          this.vy *= this.friction;
+          
+          if(this.radius < this.futurRadius && this.dying === false){
+            this.radius += duration;
+          }else{
+            this.dying = true;
+          }
+            
+          if(this.dying === true){
+            this.radius -= duration;
+      
+            
+          }
+       
+      
+          ctx.beginPath();
+      
+          ctx.fillStyle = this.color;
+      
+          ctx.arc(this.x, this.y, this.radius, Math.PI * 2, false);
+          ctx.fill();
+          ctx.closePath();
+      
+          if (this.y < 0 || this.radius < 1) {
+            this.x = this.base[0];
+            this.dying = false;
+            this.y = this.base[1];
+            this.radius = 1.1;
+            this.setSpeed(speed);
+        this.futurRadius = utils.randomInt(radius, radius+3);
+            this.setHeading(utils.randomInt(utils.degreesToRads(0), utils.degreesToRads(360)));
+          }
+      
+        };
+      
+        this.setSpeed(utils.randomInt(.1, .5));
+        this.setHeading(utils.randomInt(utils.degreesToRads(0), utils.degreesToRads(360)));
+      
+      }
+      // element2 = document.getElementById("2");
+      // element3 = document.getElementById("3");
+      // element4 = document.getElementById("4");
+      // element5 = document.getElementById("5");
+      // element6 = document.getElementById("6");
+      
+      // fieldvalue = document.getElementById("message");
+      gravity = parseFloat(0);//element2.value);
+      duration =  parseFloat(0.4);//element3.value);
+      resolution = parseFloat(4);//element4.value);
+      speed = parseFloat(0.1);//element5.value);
+      radius = parseFloat(2);//element5.value);
+      
+      // var message = new shape(W / 2, H / 2  - 40, '❤小芮');
+      var message2 = new shape(W / 2, H / 2  + 30, '生日快乐!');
+      // message.getValue();
+      message2.getValue();
+      update();
+      
+      // function change() {
+      //   ctx.clearRect(0, 0, W, H);
+      
+      //   gridX = parseFloat(element4.value);
+      //   gridY = parseFloat(element4.value);
+      //   message.placement = [];
+      //   message.text = fieldvalue.value;
+      //   message.getValue();
+      // }
+      
+      
+      // function changeV() {
+      //     gravity = parseFloat(element2.value);
+      //     duration =  parseFloat(element3.value);
+      //     speed = parseFloat(element5.value);
+      //     radius = parseFloat(element6.value);
+      // }
+      
+      var fps = 100;
+      function update() {
+        setTimeout(function() {
+          ctx.clearRect(0, 0, W, H);
+      
+      
+          // for (var i = 0; i < message.placement.length; i++) {
+          //   message.placement[i].update();
+          // }
+            for (var i = 0; i < message2.placement.length; i++) {
+            message2.placement[i].update();
+          }
+          requestAnimationFrame(update);
+        }, 1000 / fps);
+      }
+       
+      </script>
+
+
 
     <script>
        
@@ -80,6 +409,7 @@ var Point = (function() {
   return Point;
 })();
  
+
 /*
  * Particle class
  */
@@ -246,25 +576,28 @@ var ParticlePool = (function() {
     // create new particles
     var amount = particleRate * deltaTime;
     var alpha = 1;
+    var colorr ;
     for (var i = 0; i < amount; i++) {
       var pos = pointOnHeart(Math.PI - 2 * Math.PI * Math.random());
       var dir = pos.clone().length(settings.particles.velocity);
       particles.add(canvas.width / 2 + pos.x, canvas.height / 2 - pos.y, dir.x, -dir.y);
       if (i%10==0)
-        alpha -= 0.5/amount;
+        // alpha -= 0.5/amount;
+        colorr = "rgb("+~~(255*Math.random())+","+~~(255*Math.random())+","+~~(255*Math.random())+")";
     }
     
     // update and draw particles
     particles.update(deltaTime);
     particles.draw(context, image);
-    context.font = "bold 32px Microsoft YaHei";
+
+    context.font = "bold 40px Microsoft YaHei";
     context.strokeStyle = "HotPink";
-    context.fillStyle = "#FFDAB9"
+    context.fillStyle = colorr;//"#FFDAB9"
     // context.strokeStyle =
     context.globalAlpha = alpha;
     context.textAlign = "center";
-    context.fillText("❤小芮", canvas.width / 2 ,canvas.height / 2-20);
-    context.fillText("Happy Birthday!",canvas.width / 2 ,canvas.height / 2+20);
+    context.fillText("❤小芮", canvas.width / 2 ,canvas.height / 2-30);
+    // context.fillText("Happy Birthday!",canvas.width / 2 ,canvas.height / 2+20);
   }
   
   // handle (re-)sizing of the canvas
@@ -275,11 +608,39 @@ var ParticlePool = (function() {
   window.onresize = onResize;
   
   // delay rendering bootstrap
-  setTimeout(function() {
-    onResize();
-    render();
-  }, 100);
-})(document.getElementById('pinkboard'));
+  // setTimeout(function() {
+  //   onResize();
+  //   render();
+
+    
+  //   for (var i = 0; i < message.placement.length; i++) {
+  //     message.placement[i].update();
+  //   }
+
+  //   // requestAnimationFrame(update);
+    
+  // }, 100);
+
+  update();
+  function update() {
+    setTimeout(function() {
+      // ctx.clearRect(0, 0, W, H);
+      // for (var i = 0; i < message.placement.length; i++) {
+      //   message.placement[i].update();
+      // }
+      onResize();
+      render();
+      // context.fillStyle = "rgb("+~~(255*Math.random())+","+~~(255*Math.random())+","+~~(255*Math.random())+")";//'#ea80b0';
+
+
+      // requestAnimationFrame(update);
+    }, 1000);
+  }
+
+
+
+
+})(document.getElementById('canvas1'));
 
 var a_idx = 0;
   $(document).ready(function() {
@@ -306,13 +667,179 @@ var a_idx = 0;
             function() {
                 $i.remove();
             });
-	    return false;
-        })
+            return false;
+      });
     });
  
  
  
     </script>
+<canvas id="tree"></canvas>
+
+<canvas id="flower"></canvas>
+
+<script>
+
+//两个canvas
+
+var tree = document.getElementById("tree");
+
+tree.width = window.innerWidth;
+
+tree.height = window.innerHeight ;
+
+var tCxt = tree.getContext("2d");
+
+var flower = document.getElementById("flower");
+
+flower.width = window.innerWidth;
+
+flower.height = window.innerHeight ;
+
+var cxt = flower.getContext("2d");
+
+var flowerList = [];//樱花列表
+
+var rootTop = 320 ;//树起点
+
+var flowerColor = "rgba(255,192,203,.3)" ;//花色
+
+var flowerColorDeep = "rgba(241,158,194,.5)" ;//花色深
+
+var treeColor2 = "rgba(255,192,203,.5)" ;//树枝颜色
+
+var treeColor = "#FFF" ;//树干颜色
+
+var fallList = [];//飘落樱花列表
+
+var g = 0.01 ;//重力加速度
+
+var gWind = 0.005;//风力加速度
+
+var limitSpeedY = 1;//速度上限
+
+var limitSpeedX = 1 ;//速度上限
+
+cxt.shadowColor= "#FFF" ;
+
+cxt.shadowBlur = 10 ;
+
+function drawTree(x,y,deg,step,type){
+
+    var deg1 = step%2 == 0 ? 0.1 : -0.1 ;
+
+    var x1 = x + Math.cos(deg+deg1) * (step+4) * 0.8 ;//以步长来判断枝干长度 x轴偏移大一些
+
+    var y1 = y + Math.sin(deg+deg1) * (step-1) * 0.8 ;//以步长来判断枝干长度 Y轴压缩一些
+
+    tCxt.beginPath();
+
+    tCxt.lineWidth = step/3;
+
+    tCxt.moveTo(x,y);
+
+    tCxt.lineTo(x1,y1);
+
+    tCxt.strokeStyle = (step > 5 ) ? treeColor : treeColor2 ;//细纸条都换成花的颜色
+
+    tCxt.stroke();
+
+    if(step > 20){//树干相交的位置有间隙，以一个圆填充
+
+        tCxt.fillStyle = treeColor ;
+
+        tCxt.arc(x,y,step/6,0,Math.PI*2);
+
+        tCxt.fill();
+
+    }
+
+    if(step < 3 || (step < 23 && Math.random() > 0.1)){
+
+        //末梢位置 画花瓣
+
+        var color = [flowerColorDeep,flowerColor,flowerColor][Math.round(Math.random()+0.2)] ;
+
+        var r = 2+Math.random()*2
+
+        tCxt.fillStyle = color ;
+
+        tCxt.arc(x1+Math.random()*3,y1+Math.random()*3,r,0,Math.PI)
+
+        tCxt.fill();
+
+        flowerList.push({x:x,y:y,sx:(Math.random()-0.5),sy:0,color:color,r:r,deg:deg});//保存下画樱花的位置
+
+    }
+
+    step -- ;
+
+    if(step > 0){
+
+        drawTree(x1,y1,deg,step,type);
+
+        if(step%3 == 1 && step > 0 && step < 30)
+
+            drawTree(x1,y1,deg+0.2 + 0.3 * Math.random(),Math.round(step/1.13));//右分叉
+
+        if(step%3 == 0 && step > 0 && step < 30)
+
+            drawTree(x1,y1,deg-0.2 - 0.3 * Math.random(),Math.round(step/1.13));//左分叉
+
+    }
+
+}
+
+drawTree(tree.width/2,rootTop,-Math.PI/2,30,1);//执行
+
+var len = flowerList.length ;
+
+function step(){
+
+    if(Math.random() > 0.3)    fallList.push(flowerList[Math.floor(Math.random()*len)]);//随机取出一个，花瓣复制到飘落花瓣的列表中
+
+    cxt.clearRect(0,0,tree.width,tree.height);
+
+    for(var i = 0 ;i < fallList.length ; i ++){
+
+        if(fallList[i].sy < limitSpeedY) fallList[i].sy += g ;
+
+        fallList[i].sx += gWind ;
+
+        fallList[i].x += fallList[i].sx ;
+
+        fallList[i].y += fallList[i].sy ;
+
+        if(fallList[i].y > rootTop){//飘到树根的花瓣移除
+
+            fallList.splice(i,1);
+
+            i -- ;
+
+            continue ;
+
+        }
+
+        cxt.beginPath();
+
+        cxt.fillStyle = fallList[i].color ;
+
+        fallList[i].deg += fallList[i].sx*0.05 ;//跟速度相关的旋转花瓣
+
+        cxt.arc(fallList[i].x,fallList[i].y,fallList[i].r,fallList[i].deg,fallList[i].deg+Math.PI*1.3);
+
+        cxt.fill();
+
+    }
+
+    requestAnimationFrame(step);
+
+}
+
+requestAnimationFrame(step);
+
+</script>
+
 </body>
 </html>
 
