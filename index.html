@@ -43,12 +43,12 @@ canvas {
   }
   #tree {
     position: absolute;
-      left: -300px;
+      left: -200px;
       top: 0px;
   }
   #flower{
     position: absolute;
-    left: -300px;
+    left: -200px;
       top: 0px;
   }
 </style>
@@ -317,9 +317,9 @@ canvas {
       speed = parseFloat(0.1);//element5.value);
       radius = parseFloat(2);//element5.value);
       
-      // var message = new shape(W / 2, H / 2  - 40, '❤小芮');
+      var message = new shape(W / 2, H / 2  - 40, '❤小芮');
       var message2 = new shape(W / 2, H / 2  + 30, '生日快乐!');
-      // message.getValue();
+      message.getValue();
       message2.getValue();
       update();
       
@@ -347,9 +347,9 @@ canvas {
           ctx.clearRect(0, 0, W, H);
       
       
-          // for (var i = 0; i < message.placement.length; i++) {
-          //   message.placement[i].update();
-          // }
+          for (var i = 0; i < message.placement.length; i++) {
+            message.placement[i].update();
+          }
             for (var i = 0; i < message2.placement.length; i++) {
             message2.placement[i].update();
           }
@@ -590,13 +590,13 @@ var ParticlePool = (function() {
     particles.update(deltaTime);
     particles.draw(context, image);
 
-    context.font = "bold 40px Microsoft YaHei";
-    context.strokeStyle = "HotPink";
-    context.fillStyle = colorr;//"#FFDAB9"
-    // context.strokeStyle =
-    context.globalAlpha = alpha;
-    context.textAlign = "center";
-    context.fillText("❤小芮", canvas.width / 2 ,canvas.height / 2-30);
+    // context.font = "bold 40px Microsoft YaHei";
+    // context.strokeStyle = "HotPink";
+    // context.fillStyle = colorr;//"#FFDAB9"
+    // // context.strokeStyle =
+    // context.globalAlpha = alpha;
+    // context.textAlign = "center";
+    // context.fillText("❤小芮", canvas.width / 2 ,canvas.height / 2-30);
     // context.fillText("Happy Birthday!",canvas.width / 2 ,canvas.height / 2+20);
   }
   
