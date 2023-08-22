@@ -14,7 +14,7 @@
 </head>
 <body>
 <a-scene vr-mode-ui='enabled: false' arjs='sourceType: webcam; videoTexture: true; debugUIEnabled: false' renderer='antialias: true; alpha: true'>
-    <a-camera  gps-new-camera='gpsMinDistance: 10' position="0 100 500"></a-camera>
+    <a-camera look-controls gps-new-camera='gpsMinDistance: 10' position="0 100 500"></a-camera>
     <!-- <a-entity look-controls  gltf-model="/static/pic/guaiguai.gltf" scale="0.08 0.08 0.08" id="a-location" gps-new-entity-place="" ></a-entity> -->
     <!-- <a-nft
     type="nft"
@@ -24,6 +24,8 @@
     smoothTolerance=".01"
     smoothThreshold="5" -->
     <a-entity position="0 40 450" gltf-model="/static/pic/guaiguai.gltf" scale="2 2 2" id="a-location" gps-new-entity-place="" ></a-entity>
+    <a-entity position="10 40 450" gltf-model="/static/pic/pp.gltf" scale="2 2 2" id="a-location3" gps-new-entity-place="" ></a-entity>
+    <a-entity position="20 40 450" gltf-model="/static/pic/dd.gltf" scale="2 2 2" id="a-location4" gps-new-entity-place="" ></a-entity>
     <a-entity look-controls rotation="0 0 0" position="0 80 400" gltf-model="/static/pic/cat.gltf" scale="0.2 0.2 0.2" id="a-location2" gps-new-entity-place="" ></a-entity>
   <!-- </a-nft> -->
     <!-- <a-entity material='color: red' geometry='primitive: box'  id="a-location" gps-new-entity-place="" scale="10 10 10"></a-entity> -->
@@ -34,12 +36,17 @@
   window.onload = navigator.geolocation.getCurrentPosition(function(position) {
       var entity = document.getElementById('a-location')
       var entity2 = document.getElementById('a-location2')
-
+      var entity3 = document.getElementById('a-location3')
+      var entity4 = document.getElementById('a-location4')
+      const randomValue = Math.random() < 0.5 ? 1 : -1;
+      const randomValue2 = Math.random() < 0.5 ? 1 : -1;
       var latitude = position.coords.latitude;
       var longitude = position.coords.longitude;
       console.log(latitude+" "+longitude);
       entity.setAttribute('gps-new-entity-place', 'latitude: '+latitude+';' +'longitude:' + longitude);
-      entity2.setAttribute('gps-new-entity-place', 'latitude: '+(latitude+0.001)+';' +'longitude:' + (longitude+0.001));
+      entity2.setAttribute('gps-new-entity-place', 'latitude: '+(latitude+randomValue*0.0008)+';' +'longitude:' + (longitude+randomValue2*0.0008));
+      entity3.setAttribute('gps-new-entity-place', 'latitude: '+(latitude)+';' +'longitude:' + (longitude-0.0005));
+      entity4.setAttribute('gps-new-entity-place', 'latitude: '+(latitude)+';' +'longitude:' + (longitude+0.0005));
     });
     </script>
 </body>
